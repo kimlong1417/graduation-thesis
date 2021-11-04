@@ -1,24 +1,34 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+
+from rest_framework.views import APIView
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
 
 from .models import Account
-from .forms import AccountForm
+from baseApp.api.serializers import AccountSerializer
 
 # Create your views here.
+# class AccountAPIView(APIView):
+@api_view(['POST'])
+def registerUser(request):
+    serializer = AccountSerializer(data=request.data)
+    if not serializer.is_valid(): 
+        return Response('Wrong', status=status.HTTP_400_BAD_REQUEST)
+    username = serializer.data['username']
+    passoword = serializer.data['password']
+    acc = Account.objects.create(username=username,password=passoword)
+    return Response(data=acc.username, status=status.HTTP_200_OK)
 
-def home(request):
-    accounts = Account.objects.all()
-    context = {'accounts': accounts}
-    return render(request,'home.html', context)
+@api_view(['POST'])
+def loginUser(request):
+    serializer = AccountSerializer(data=request.data)
+    if serializer.is_valid():
+        username1 = serializer.data['username']
+        password1 = serializer.data['password']
+        try:
+            username = Account.objects.filter(username=username1).get(password=password1)
+        except Account.DoesNotExist:
+            return Response('Wrong', status=status.HTTP_400_BAD_REQUEST)
 
-def register(request):
-    form = AccountForm()
-    if request.method == "POST":
-        form = AccountForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('home')
-    context = {
-        'form': form
-    }
-    return render(request,'register.html', context)
+    return Response(data=serializer.data,status=status.HTTP_200_OK)
