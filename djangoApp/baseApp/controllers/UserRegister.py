@@ -16,15 +16,15 @@ def registerUser(request):
     if request.method == "POST":
         serializer = AccountSerializer(data=request.POST)
         if serializer.is_valid():
-            username1 = serializer.data['username']
-            password1 = serializer.data['password']
-            email1 = serializer.data['email']
+            username_register = serializer.data['username']
+            password_register = serializer.data['password']
+            email_register = serializer.data['email']
         # serializer = AccountSerializer(data=request.data)
         # if not serializer.is_valid(): 
             # username = serializer.data['username']
             # password = serializer.data['password']
-        #     return Response('Wrong', status=status.HTTP_400_BAD_REQUEST)
-            acc = Account.objects.create(username=username1, password=password1, email=email1)
+            # return Response('Wrong', status=status.HTTP_400_BAD_REQUEST)
+            acc = Account.objects.create(username=username_register, password=password_register, email=email_register)
             acc.save()
         # return redirect('loginView', foo="")
         return redirect('loginUser')

@@ -14,12 +14,14 @@ def loginUser(request):
     if request.method == "POST":
         serializer = AccountSerializer(data=request.POST)
         if serializer.is_valid():
-            username1 = serializer.data['username']
-            password1 = serializer.data['password']
-        try:
-            username = Account.objects.filter(username=username1).get(password=password1)
-        except Account.DoesNotExist:
-            return Response('Wrong', status=status.HTTP_400_BAD_REQUEST)
+            username_login = serializer.data['username']
+            password_login = serializer.data['password']
+            try:
+                account = Account.objects.filter(username=username_login).get(password=password_login)
+                
+                return Response(account, status=status.HTTP_200_OK)
+            except Account.DoesNotExist:
+                return Response('Wrong', status=status.HTTP_400_BAD_REQUEST)
     # serializer = AccountSerializer(data=request.data)
     # if serializer.is_valid():
     #     username1 = serializer.data['username']
