@@ -27,7 +27,8 @@ def registerUser(request):
             acc = Account.objects.create(username=username_register, password=password_register, email=email_register)
             acc.save()
         # return redirect('loginView', foo="")
-        return redirect('loginUser')
+        # return redirect('loginUser')
+        return Response(serializer.data)
     return render(request, "registerView.html", {})
 
 
