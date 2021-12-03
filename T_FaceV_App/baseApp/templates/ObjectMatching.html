@@ -1,0 +1,41 @@
+{% extends "base.html" %} {% block content %} {% load static %}
+<h1>Split and Display 3 Chanels</h1>
+<div class="main-agileinfo">
+    <div class="agileits-top">
+        <form action="#" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="file" name="document">
+            <input type="file" name="document1">
+            <input type="submit" value="Display">
+            {% for item in kq1 %}
+                <img src="{{ item.image.url }}" alt="111111111111">
+            {% endfor %}
+
+        </form>
+    </div>
+</div>
+
+<ul class="colorlib-bubbles">
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+</ul>
+
+{% endblock %}

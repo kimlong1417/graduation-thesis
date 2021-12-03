@@ -1,0 +1,39 @@
+{% extends "base.html" %} {% block content %}
+<h1>Home</h1>
+<div class="main-agileinfo">
+    <div class="agileits-top">
+        <form action="#" method="POST" > {#enctype="multipart/form-data">#}
+            {% csrf_token %}
+{#            <input type="file" id="files" name="document" multiple>#}
+            <input type="submit" value="Câu A">
+            <input type="submit" value="Câu B">
+            <input type="submit" value="Câu C">
+            <input type="submit" value="Câu D">
+        </form>
+    </div>
+</div>
+
+<ul class="colorlib-bubbles">
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+</ul>
+
+{% endblock %}
