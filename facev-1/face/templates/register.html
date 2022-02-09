@@ -5,18 +5,12 @@
         <form action="#" method="POST">
             {% csrf_token %}
             <input class="text" type="text" name="username" placeholder="Username" required="">
+            <br>
+            <input class="text" type="text" name="name" placeholder="Name" required="">
             <input class="text email" type="email" name="email" placeholder="Email" required="">
             <input class="text" type="password" name="password" placeholder="Password" required="">
             <br>
             <input class="text" type="password" name="cofirmPwd" placeholder="Cofirm Password" required="">
-            <!-- <input class="text w3lpass" type="password" name="password" placeholder="Confirm Password" required=""> -->
-            <!-- <div class="wthree-text">
-                <label class="anim">
-							<input type="checkbox" class="checkbox" required="">
-							<span>I Agree To The Terms & Conditions</span>
-						</label>
-                <div class="clear"> </div>
-            </div> -->
             <input type="submit" value="SIGNUP">
         </form>
         <p>Have an Account? <a href="/login"> Login Now!</a></p>

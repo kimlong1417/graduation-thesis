@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from .models import AccountUser
 import uuid
@@ -12,8 +12,7 @@ def login(request):
         password = login_data.get('password')
         try:
             pwd = uuid.uuid5(uuid.NAMESPACE_DNS,password)
-            password1 = str(pwd)
-            pwd1 = AccountUser.objects.filter(username=username).get(password=password1)
+            AccountUser.objects.filter(username=username).get(password=pwd)
         except AccountUser.DoesNotExist:
             return HttpResponse("Wrong username or password")
         context = {username, password}
@@ -30,8 +29,11 @@ def register(request):
         if(password != cofirmPwd):
             return HttpResponse("Wrong username or password!")
         pwd = uuid.uuid5(uuid.NAMESPACE_DNS,password)
-        password1 = str(pwd)
-        account = AccountUser.objects.create(username=username,email=email,password=password1)
+        account = AccountUser.objects.create(username=username,email=email,password=pwd)
         account.save()
         return HttpResponse("Successfully!")
     return render(request, 'register.html', {})
+
+def test_view(request):
+    context = {}
+    return render(request, 'base_index.html', context)
