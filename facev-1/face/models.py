@@ -1,3 +1,5 @@
+from email.policy import default
+from socket import INADDR_UNSPEC_GROUP
 from django.db import models
 import uuid
 
@@ -12,3 +14,8 @@ class AccountUser(models.Model):
     
     def __str__(self):
         return self.name
+
+class ImageUser(models.Model):
+    id_image = models.UUIDField(primary_key=True, default=uuid.uuid1, auto_created=True, serialize=False, verbose_name='ID')
+    id_user = models.ForeignKey(AccountUser, on_delete=models.CASCADE)
+    image = models.CharField(max_length=200)

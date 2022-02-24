@@ -1,7 +1,9 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .models import AccountUser
+from matplotlib.style import context
+from .models import AccountUser, ImageUser
 import uuid
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 
@@ -15,8 +17,9 @@ def login(request):
             AccountUser.objects.filter(username=username).get(password=pwd)
         except AccountUser.DoesNotExist:
             return HttpResponse("Wrong username or password")
-        context = {username, password}
-        return HttpResponse(context)
+        # context = {username, password}
+        # return HttpResponse(context)
+        return render(request, 'index.html')
     return render(request, 'login.html')
 
 def register(request):
@@ -34,6 +37,17 @@ def register(request):
         return HttpResponse("Successfully!")
     return render(request, 'register.html', {})
 
+@login_required(login_url="/login/")
 def test_view(request):
     context = {}
-    return render(request, 'base_index.html', context)
+    return render(request, 'index.html', context)
+
+def saveImage(request):
+    if(request.POST):
+        file = request.POST.dict()
+        image = file.get('image')
+        print(image)
+        image_file = ImageUser.objects.create(image=image)
+        image_file.save()
+        return HttpResponse("Successfully!")
+        
