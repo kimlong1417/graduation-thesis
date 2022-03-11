@@ -46,9 +46,10 @@ def upload_image():
                 path = os.path.join(create_path(), filename)
                 print(path)
                 file.save(path)
-                check_image_name = Image.query.filter_by(img=path).first()
-                user_image = Image.query.filter(user_id=current_user.id).filter_by(img=path).first()
-                if check_image_name:
+                # check_image_name = Image.query.filter_by(img=path).first()
+                # check user image where current_user = current_user.id, where img=path
+                user_image = Image.query.filter_by(user_id=current_user.id, img=path).first()
+                if user_image:
                     flash('This image already exists.', category='error')
                 else:
                     pic = Image(img=path, user_id=current_user.id)
