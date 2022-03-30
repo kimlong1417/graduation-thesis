@@ -40,6 +40,13 @@ def create_path():
         os.makedirs(path)
     return path
 
+def result_path():
+    path = UPLOAD_FOLDER + '/result_' + current_user.first_name + '/'
+    isExist = os.path.exists(path)
+    if not isExist:
+        os.makedirs(path)
+    return path
+
 
 @views.route('/upload', methods=['GET', 'POST'])
 def upload_image():
@@ -120,7 +127,7 @@ def verify_image():
         compare_image(imageA_pixel, imageB_pixel, newTrain_ImageA, newTrain_ImageB, current_user.first_name)
 
         pic = current_user.first_name + '.jpg'
-        img1 = Image1.open(os.path.join(create_path(), pic))
+        img1 = Image1.open(os.path.join(result_path(), pic))
         data = io.BytesIO()
         img1.save(data, "JPEG")
 
