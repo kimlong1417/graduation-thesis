@@ -4,6 +4,7 @@ from os import path
 from flask_login import LoginManager
 
 # from website import models
+from keras.models import load_model
 
 db = SQLAlchemy()
 DB_NAME = "database.db"

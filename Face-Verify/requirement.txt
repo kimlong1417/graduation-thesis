@@ -1,0 +1,7 @@
+tensorflow==2.8.0
+matplotlib==3.5.1
+flask-login
+flask
+flask-sqlalchemy
+scipy==1.7.3
+sklearn

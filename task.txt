@@ -1,0 +1,3 @@
+so sánh nhiều ảnh thì sẽ có nhiều kq đo và sẽ tính trung bình của tất cả kq lại, chỉ ra đc là ai
+so sánh FaceNet với LSTM-FaceNet
+thu thập dữ liệu ảnh
