@@ -5,3 +5,5 @@ flask
 flask-sqlalchemy
 scipy==1.7.3
 sklearn
+mtcnn
+facenet

@@ -127,7 +127,7 @@ def verify_image():
         compare_image(imageA_pixel, imageB_pixel, newTrain_ImageA, newTrain_ImageB, current_user.first_name)
 
         pic = current_user.first_name + '.jpg'
-        img1 = Image1.open(os.path.join(result_path(), pic))
+        img1 = Image1.open(os.path.join(create_path(), pic))
         data = io.BytesIO()
         img1.save(data, "JPEG")
 
