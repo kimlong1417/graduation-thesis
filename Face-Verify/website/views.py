@@ -8,7 +8,6 @@ from flask import Blueprint, render_template, request, flash, redirect
 from flask_login import login_required, current_user
 from keras.models import load_model
 from numpy import asarray
-from scipy import spatial
 from sklearn.metrics.pairwise import cosine_distances
 from werkzeug.utils import secure_filename
 from mtcnn.mtcnn import MTCNN
@@ -189,21 +188,23 @@ def mse(imageA, imageB):
 def compare_image(imgA, imgB, imgA_pixel, imgB_pixel, title):
     # compute the mean squared error and structural similarity
     # index for the images
-    m = mse(imgA_pixel, imgB_pixel)
-    spicy = 1 -spatial.distance.cosine(imgA_pixel, imgB_pixel)
-    imgB_pixel_T = imgB_pixel.T
-    nump = imgA_pixel.dot(imgB_pixel_T) / (np.linalg.norm(imgA_pixel, axis=1) * np.linalg.norm(imgB_pixel_T))
+    # m = mse(imgA_pixel, imgB_pixel)
+    # spicy = 1 -spatial.distance.cosine(imgA_pixel, imgB_pixel)
+    # imgB_pixel_T = imgB_pixel.T
+    # nump = imgA_pixel.dot(imgB_pixel_T) / (np.linalg.norm(imgA_pixel, axis=1) * np.linalg.norm(imgB_pixel_T))
     skl = 1 - cosine_distances(imgA_pixel, imgB_pixel)
     # setup the figure
     fig = plt.figure(title)
-    plt.suptitle("MSE: %.5f, Spicy: %.5f, Numpy: %.5f, Sklearn: %.5f" % (m, spicy, nump, skl))
+    # plt.suptitle("MSE: %.5f, Spicy: %.5f, Numpy: %.5f, Sklearn: %.5f" % (m, spicy, nump, skl))
+    plt.suptitle("Sklearn: %.5f" % skl)
     # show first image
-    ax = fig.add_subplot(1, 2, 1)
+    fig.add_subplot(1, 2, 1)
     plt.imshow(imgA, cmap=plt.cm.gray)
     plt.axis("off")
     # show the second image
-    ax = fig.add_subplot(1, 2, 2)
+    fig.add_subplot(1, 2, 2)
     plt.imshow(imgB, cmap=plt.cm.gray)
     plt.axis("off")
     # show the images
     plt.savefig(create_path() + title + '.jpg')
+    plt.close()
