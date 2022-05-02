@@ -8,6 +8,7 @@ from flask import Blueprint, render_template, request, flash, redirect
 from flask_login import login_required, current_user
 from keras.models import load_model
 from numpy import asarray
+from scipy import spatial
 from sklearn.metrics.pairwise import cosine_distances
 from werkzeug.utils import secure_filename
 from mtcnn.mtcnn import MTCNN
@@ -84,15 +85,7 @@ def upload_image():
 def verify_image():
     if request.method == 'POST':
         imageA = request.files['file1']
-        imageB = request.files['file2']
-        # if 'file1' and 'file2' not in request.files:
-        #     flash('No file part.', category='error')
-        #     return redirect(request.url)
-        # file1 = request.files.getlist("file1")
-        # file2 = request.files.getlist("file2")
-        # if file1.index and file2.index == '':
-        #     flash('No image selected for uploading.', category='error')
-        #     return redirect(request.url)
+        # imageB = request.files['file2']
 
         if imageA and allowed_file(imageA.filename):
             filename = secure_filename(imageA.filename)
@@ -108,30 +101,46 @@ def verify_image():
             flash('Allowed image types are - png, jpg, jpeg, gif')
             return redirect(request.url)
 
-        if imageB and allowed_file(imageB.filename):
-            filename = secure_filename(imageB.filename)
-            imageB_path = os.path.join(create_path(), filename)
-            imageB.save(imageB_path)
-            imageB_pixel = extract_face(imageB_path)
-            newTrain_ImageB = list()
-            imageB_embedding = get_embedding(MODEL, imageB_pixel)
-            newTrain_ImageB.append(imageB_embedding)
-            newTrain_ImageB = np.asarray(newTrain_ImageB)
-            flash('The first image successfully uploaded', category='success')
-        else:
-            flash('Allowed image types are - png, jpg, jpeg, gif')
-            return redirect(request.url)
-        # print(newTrain_ImageA, newTrain_ImageB)
+        # if imageB and allowed_file(imageB.filename):
+        #     filename = secure_filename(imageB.filename)
+        #     imageB_path = os.path.join(create_path(), filename)
+        #     imageB.save(imageB_path)
+        #     imageB_pixel = extract_face(imageB_path)
+        #     newTrain_ImageB = list()
+        #     imageB_embedding = get_embedding(MODEL, imageB_pixel)
+        #     newTrain_ImageB.append(imageB_embedding)
+        #     newTrain_ImageB = np.asarray(newTrain_ImageB)
+        #     flash('The first image successfully uploaded', category='success')
+        # else:
+        #     flash('Allowed image types are - png, jpg, jpeg, gif')
+        #     return redirect(request.url)
 
-        compare_image(imageA_pixel, imageB_pixel, newTrain_ImageA, newTrain_ImageB, current_user.first_name)
+        Img = Image.query.filter_by(user_id=current_user.id).order_by(Image.img).all()
+        total = 0
+        point = 0
+        for im in Img:
+            try:
+                print(im.img)
+                imageB_pixel = extract_face(im.img)
+                newTrain_ImageB = list()
+                imageB_embedding = get_embedding(MODEL, imageB_pixel)
+                newTrain_ImageB.append(imageB_embedding)
+                newTrain_ImageB = np.asarray(newTrain_ImageB)
+                cosine_distances_score = compare_image(imageA_pixel,imageB_pixel,newTrain_ImageA,newTrain_ImageB,current_user.first_name)
+                print(cosine_distances_score)
+                point += 1
+                total += cosine_distances_score
+            except:
+                return redirect(request.url)
 
+        mean = total/point
         pic = current_user.first_name + '.jpg'
         img1 = Image1.open(os.path.join(create_path(), pic))
         data = io.BytesIO()
         img1.save(data, "JPEG")
 
         encode_image = base64.b64encode(data.getvalue())
-        return render_template("verify.html", pic = encode_image.decode("UTF-8"), user=current_user)
+        return render_template("verify.html", pic = encode_image.decode("UTF-8"), user=current_user, mean=mean)
     return render_template("verify.html", user=current_user)
 
 
@@ -188,15 +197,15 @@ def mse(imageA, imageB):
 def compare_image(imgA, imgB, imgA_pixel, imgB_pixel, title):
     # compute the mean squared error and structural similarity
     # index for the images
-    # m = mse(imgA_pixel, imgB_pixel)
-    # spicy = 1 -spatial.distance.cosine(imgA_pixel, imgB_pixel)
-    # imgB_pixel_T = imgB_pixel.T
-    # nump = imgA_pixel.dot(imgB_pixel_T) / (np.linalg.norm(imgA_pixel, axis=1) * np.linalg.norm(imgB_pixel_T))
+    m = mse(imgA_pixel, imgB_pixel)
+    spicy = 1 - spatial.distance.cosine(imgA_pixel, imgB_pixel)
+    imgB_pixel_T = imgB_pixel.T
+    nump = imgA_pixel.dot(imgB_pixel_T) / (np.linalg.norm(imgA_pixel, axis=1) * np.linalg.norm(imgB_pixel_T))
     skl = 1 - cosine_distances(imgA_pixel, imgB_pixel)
     # setup the figure
     fig = plt.figure(title)
-    # plt.suptitle("MSE: %.5f, Spicy: %.5f, Numpy: %.5f, Sklearn: %.5f" % (m, spicy, nump, skl))
-    plt.suptitle("Sklearn: %.5f" % skl)
+    plt.suptitle("MSE: %.5f, Spicy: %.5f, Numpy: %.5f, Sklearn: %.5f" % (m, spicy, nump, skl))
+    # plt.suptitle("Sklearn: %.5f" % skl)
     # show first image
     fig.add_subplot(1, 2, 1)
     plt.imshow(imgA, cmap=plt.cm.gray)
@@ -208,3 +217,4 @@ def compare_image(imgA, imgB, imgA_pixel, imgB_pixel, title):
     # show the images
     plt.savefig(create_path() + title + '.jpg')
     plt.close()
+    return skl
