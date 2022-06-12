@@ -1,0 +1,26 @@
+{% extends "base.html" %} {% block title %}Home{% endblock %}
+{% block content %}
+    <h1 align="center">Face Verification</h1>
+    <nav class="navbar navbar-expand-lg">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar"></button>
+        <div class="collapse navbar-collapse" id="navbar">
+            <div class="navbar-nav">
+                <a class="btn btn-primary ml-1" id="upload" href="/upload">Upload</a>
+                <a class="btn btn-primary ml-1" id="verify" href="/verify">Verify</a>
+            </div>
+        </div>
+    </nav>
+{% block controller %}
+    <h1 align="center">Images</h1>
+    {% for img in user.image %}
+    <div class="d-inline-flex flex-column p-2 bd-highlight">
+        <figure class="figure">
+                <img src="/../{{ img.img }}" class="figure-img img-fluid rounded">
+        </figure>
+        <button type="button" class="close float" onclick="deleteImg({{ img.id }})">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    {% endfor %}
+{% endblock %}
+{% endblock %}
