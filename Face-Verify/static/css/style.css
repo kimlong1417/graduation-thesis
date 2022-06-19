@@ -1,7 +1,56 @@
-img {
+.figure img {
   max-width: 150px;
   max-height: 200px;
 }
 .float {
     flex: none;
+}
+
+@import url('https://fonts.googleapis.com/css?family=Ubuntu:700&display=swap');
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Ubuntu', sans-serif;
+  text-decoration: none;
+}
+
+.box_result {
+    margin-top: 20px;
+    margin-bottom: 50px;
+    margin-left: 200px;
+    margin-right: 200px;
+    align-items: center;
+    background: #F3F1F5;
+    border-radius: 40px;
+    padding-top: 30px;
+    padding-bottom: 30px;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px, rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset;
+ }
+.right_result {
+    line-height: 26px;
+    width: 100%;
+    align-items: center;
+}
+
+.title_result {
+    font-size: 30px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 30px;
+    margin-top: 30px;
+}
+
+.accuracy_result {
+    font-size: 24px;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  height: 100%;
 }

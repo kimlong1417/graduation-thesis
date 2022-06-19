@@ -11,18 +11,18 @@
 <!--            <label class="input-group-text" for="inputGroupFile02">Image 2</label>-->
 <!--        </div>-->
         <br>
-        <button type="submit" class="btn btn-primary">Upload</button>
+        <button type="submit" class="btn btn-primary">Submit</button>
     </form>
 
     {% if pic %}
-        <div>
-            <img src="data:image/jpeg; base64, {{ pic }}">
+        <div class="box_result">
+            <img class="center" src="data:image/jpeg; base64, {{ pic }}">
+            {% if mean %}
+                <h3 class="accuracy_result">Cosine distance score: {{ mean }}</h3>
+            {% endif %}
         </div>
     {% endif %}
 
-    {% if mean %}
-        <h1>{{ mean }}</h1>
-    {% endif %}
 
 
 {% endblock %}
