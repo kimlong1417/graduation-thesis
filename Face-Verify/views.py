@@ -1,6 +1,7 @@
 import base64
 import io
 import os
+from os import listdir
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -82,7 +83,9 @@ def upload_image():
             else:
                 flash('Allowed image types are - png, jpg, jpeg, gif', category='error')
                 return redirect(request.url)
-
+        image_path = create_path()
+        train_X = load_faces(image_path)
+        np.savez_compressed('D:/Github/graduation-thesis/Face-Verify/friends_dataset.npz', train_X)
     return render_template("upload.html", user=current_user)
 
 
@@ -307,31 +310,20 @@ def mse(imageA, imageB):
     # the two images are
     return err
 
-
-# def compare_image(imgA, imgB, imgA_pixel, imgB_pixel, title):
-#     # compute the mean squared error and structural similarity
-#     # index for the images
-#     m = mse(imgA_pixel, imgB_pixel)
-#     spicy = 1 - spatial.distance.cosine(imgA_pixel, imgB_pixel)
-#     imgB_pixel_T = imgB_pixel.T
-#     nump = imgA_pixel.dot(imgB_pixel_T) / (np.linalg.norm(imgA_pixel, axis=1) * np.linalg.norm(imgB_pixel_T))
-#     skl = 1 - cosine_distances(imgA_pixel, imgB_pixel)
-#     # setup the figure
-#     fig = plt.figure(title)
-#     plt.suptitle("MSE: %.5f, Spicy: %.5f, Numpy: %.5f, Sklearn: %.5f" % (m, spicy, nump, skl))
-#     # plt.suptitle("Sklearn: %.5f" % skl)
-#     # show first image
-#     fig.add_subplot(1, 2, 1)
-#     plt.imshow(imgA, cmap=plt.cm.gray)
-#     plt.axis("off")
-#     # show the second image
-#     fig.add_subplot(1, 2, 2)
-#     plt.imshow(imgB, cmap=plt.cm.gray)
-#     plt.axis("off")
-#     # show the images
-#     plt.savefig(create_path() + title + '.jpg')
-#     plt.close()
-#     return skl
+# load images and extract faces for all images in a directory
+def load_faces(directory):
+    faces = list()
+    #enumerate files
+    for filename in listdir(directory):
+        # path
+        path = directory + filename
+        # get face
+        x, face = extract_face(path)
+        face = asarray(face)
+        # store
+        faces.append(face)
+        aa = asarray(faces)
+    return aa
 
 def compare_images(path1, path2, imageA, imageB):
     # compute the mean squared error and structural similarity
