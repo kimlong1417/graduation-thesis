@@ -16,6 +16,7 @@ from mtcnn.mtcnn import MTCNN
 import json
 from scipy.spatial import distance
 import math
+from numpy import load
 
 from .models import Image
 
@@ -25,6 +26,7 @@ from . import ALLOWED_EXTENSIONS, db, UPLOAD_FOLDER
 
 views = Blueprint('views', __name__)
 MODEL = load_model('D:/Github/graduation-thesis/facenet_keras.h5')
+
 
 
 def allowed_file(filename):
@@ -86,6 +88,8 @@ def upload_image():
         image_path = create_path()
         train_X = load_faces(image_path)
         np.savez_compressed('D:/Github/graduation-thesis/Face-Verify/friends_dataset.npz', train_X)
+        data = 'D:/Github/graduation-thesis/Face-Verify/friends_dataset.npz'
+        load_face_dataset(data)
     return render_template("upload.html", user=current_user)
 
 
@@ -124,23 +128,26 @@ def verify_image():
         #     flash('Allowed image types are - png, jpg, jpeg, gif')
         #     return redirect(request.url)
 
-        Img = Image.query.filter_by(user_id=current_user.id).order_by(Image.img).all()
+        # Img = Image.query.filter_by(user_id=current_user.id).order_by(Image.img).all()
         total = 0
         point = 0
-        for im in Img:
-            try:
-                # print(im.img)
-                imageB_pixel, imageB_align = extract_face(im.img)
-                newTrain_ImageB = list()
-                imageB_embedding = get_embedding(MODEL, imageB_align)
-                newTrain_ImageB.append(imageB_embedding)
-                newTrain_ImageB = np.asarray(newTrain_ImageB)
-                cosine_distances_score = compare_images(imageA_align,imageB_align,newTrain_ImageA,newTrain_ImageB)
-                # print(cosine_distances_score)
-                point += 1
-                total += cosine_distances_score
-            except:
-                return redirect(request.url)
+        dataset = load('D://Github//graduation-thesis//Face-Verify//friends_dataset_embeddings.npz')
+        newTraindataX = dataset['arr_0']
+
+
+        for newTrain_Image in newTraindataX:
+            # # print(im.img)
+            # imageB_pixel, imageB_align = extract_face(im.img)
+            newTrain_ImageB = list()
+            # imageB_embedding = get_embedding(MODEL, imageB_align)
+            newTrain_ImageB.append(newTrain_Image)
+            newTrain_ImageB = np.asarray(newTrain_ImageB)
+
+            cosine_distances_score = compare_images(newTrain_ImageA,newTrain_ImageB)
+
+            # print(cosine_distances_score)
+            point += 1
+            total += cosine_distances_score
 
         mean = total/point
 
@@ -298,6 +305,19 @@ def get_embedding(model, face_pixels):
     yhat = model.predict(samples)
     return yhat[0]
 
+def load_face_dataset(path):
+    data = np.load(path)
+    trainX = data['arr_0']
+    # convert each face in the train set to an embedding
+    newTrainX = list()
+    for face_pixels in trainX:
+        embedding = get_embedding(MODEL, face_pixels)
+        newTrainX.append(embedding)
+    newTrainX = np.asarray(newTrainX)
+    # save arrays to one file in compressed format
+    np.savez_compressed('D:/Github/graduation-thesis/Face-Verify/friends_dataset_embeddings.npz', newTrainX)
+
+
 
 def mse(imageA, imageB):
     # the 'Mean Squared Error' between the two images is the
@@ -325,7 +345,7 @@ def load_faces(directory):
         aa = asarray(faces)
     return aa
 
-def compare_images(path1, path2, imageA, imageB):
+def compare_images(imageA, imageB):
     # compute the mean squared error and structural similarity
     # index for the images
     m = mse(imageA, imageB)
