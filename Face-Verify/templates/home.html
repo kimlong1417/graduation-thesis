@@ -1,6 +1,6 @@
 {% extends "base.html" %} {% block title %}Home{% endblock %}
 {% block content %}
-    <h1 align="center">Face Verification</h1>
+    <h1 class="title" align="center">Face Verification</h1>
     <nav class="navbar navbar-expand-lg">
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar"></button>
         <div class="collapse navbar-collapse" id="navbar">
@@ -11,9 +11,11 @@
         </div>
     </nav>
 {% block controller %}
-    <h1 align="center">Images</h1>
+    {% if user %}
+        <h1 align="center">{{ user.first_name }}'s repository</h1>
+    {% endif %}
     {% for img in user.image %}
-    <div class="d-inline-flex flex-column p-2 bd-highlight">
+    <div class="d-inline-flex flex-column p-2 bd-highlight main">
         <figure class="figure">
                 <img src="/../{{ img.img }}" class="figure-img img-fluid rounded">
         </figure>

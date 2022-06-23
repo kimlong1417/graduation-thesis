@@ -87,8 +87,8 @@ def upload_image():
                 return redirect(request.url)
         image_path = create_path()
         train_X = load_faces(image_path)
-        np.savez_compressed('D:/Github/graduation-thesis/Face-Verify/friends_dataset.npz', train_X)
-        data = 'D:/Github/graduation-thesis/Face-Verify/friends_dataset.npz'
+        np.savez_compressed(create_path() + 'friends_dataset.npz', train_X)
+        data = create_path() + 'friends_dataset.npz'
         load_face_dataset(data)
     return render_template("upload.html", user=current_user)
 
@@ -97,96 +97,99 @@ def upload_image():
 @login_required
 def verify_image():
     if request.method == 'POST':
-        imageA = request.files['file1']
-        # imageB = request.files['file2']
+        if checkRepo(current_user.id) == False:
+            imageA = request.files['file1']
+            # imageB = request.files['file2']
 
-        if imageA and allowed_file(imageA.filename):
-            filename = secure_filename(imageA.filename)
-            imageA_path = os.path.join(create_path(), filename)
-            imageA.save(imageA_path)
-            imageA_pixel, imageA_align = extract_face(imageA_path)
-            newTrain_ImageA = list()
-            imageA_embedding = get_embedding(MODEL, imageA_align)
-            newTrain_ImageA.append(imageA_embedding)
-            newTrain_ImageA = np.asarray(newTrain_ImageA)
-            flash('The first image successfully uploaded', category='success')
+            if imageA and allowed_file(imageA.filename):
+                filename = secure_filename(imageA.filename)
+                imageA_path = os.path.join(create_path(), filename)
+                imageA.save(imageA_path)
+                imageA_pixel, imageA_align = extract_face(imageA_path)
+                newTrain_ImageA = list()
+                imageA_embedding = get_embedding(MODEL, imageA_align)
+                newTrain_ImageA.append(imageA_embedding)
+                newTrain_ImageA = np.asarray(newTrain_ImageA)
+                flash('The first image successfully uploaded', category='success')
+            else:
+                flash('Allowed image types are - png, jpg, jpeg, gif')
+                return redirect(request.url)
+
+            # if imageB and allowed_file(imageB.filename):
+            #     filename = secure_filename(imageB.filename)
+            #     imageB_path = os.path.join(create_path(), filename)
+            #     imageB.save(imageB_path)
+            #     imageB_pixel = extract_face(imageB_path)
+            #     newTrain_ImageB = list()
+            #     imageB_embedding = get_embedding(MODEL, imageB_pixel)
+            #     newTrain_ImageB.append(imageB_embedding)
+            #     newTrain_ImageB = np.asarray(newTrain_ImageB)
+            #     flash('The first image successfully uploaded', category='success')
+            # else:
+            #     flash('Allowed image types are - png, jpg, jpeg, gif')
+            #     return redirect(request.url)
+
+            # Img = Image.query.filter_by(user_id=current_user.id).order_by(Image.img).all()
+            total = 0
+            point = 0
+            dataset = load(result_path() + 'friends_dataset_embeddings.npz')
+            newTraindataX = dataset['arr_0']
+
+
+            for newTrain_Image in newTraindataX:
+                # # print(im.img)
+                # imageB_pixel, imageB_align = extract_face(im.img)
+                newTrain_ImageB = list()
+                # imageB_embedding = get_embedding(MODEL, imageB_align)
+                newTrain_ImageB.append(newTrain_Image)
+                newTrain_ImageB = np.asarray(newTrain_ImageB)
+
+                cosine_distances_score = compare_images(newTrain_ImageA,newTrain_ImageB)
+
+                # print(cosine_distances_score)
+                point += 1
+                total += cosine_distances_score
+
+            mean = total/point
+
+            title = str(current_user.first_name)
+            fig = plt.figure(title,figsize=(5, 3), facecolor="#F3F1F5")
+            if (mean > 0.5):
+                plt.suptitle("TRUE: the result is " + title)
+            else:
+                plt.suptitle("FALSE: the result is not " + title)
+
+            # plt.suptitle("MSE: %.2f, SSIM: %.2f" % (m, s))
+            # show first image
+            ax1 = fig.add_subplot(1, 3, 1)
+            ax1.title.set_text("Base image")
+            img_base = plt.imread(imageA_path)
+            plt.imshow(img_base, cmap=plt.cm.gray)
+            plt.axis("off")
+            # show the second image
+            ax2 = fig.add_subplot(1, 3, 2)
+            ax2.title.set_text("Detected face")
+            plt.imshow(imageA_pixel, cmap=plt.cm.gray)
+            plt.axis("off")
+            # show the third image
+            ax3 = fig.add_subplot(1, 3, 3)
+            ax3.title.set_text("Aligned image")
+            plt.xlabel(float(mean))
+            plt.imshow(imageA_align, cmap=plt.cm.gray)
+            plt.axis("off")
+            # show the images
+            plt.savefig(result_path() + title + '.jpg')
+            plt.close()
+
+            pic = current_user.first_name + '.jpg'
+            img1 = Image1.open(os.path.join(result_path(), pic))
+            data = io.BytesIO()
+            img1.save(data, "JPEG")
+
+            encode_image = base64.b64encode(data.getvalue())
+            return render_template("verify.html", pic = encode_image.decode("UTF-8"), user=current_user, mean = float(mean))
         else:
-            flash('Allowed image types are - png, jpg, jpeg, gif')
-            return redirect(request.url)
-
-        # if imageB and allowed_file(imageB.filename):
-        #     filename = secure_filename(imageB.filename)
-        #     imageB_path = os.path.join(create_path(), filename)
-        #     imageB.save(imageB_path)
-        #     imageB_pixel = extract_face(imageB_path)
-        #     newTrain_ImageB = list()
-        #     imageB_embedding = get_embedding(MODEL, imageB_pixel)
-        #     newTrain_ImageB.append(imageB_embedding)
-        #     newTrain_ImageB = np.asarray(newTrain_ImageB)
-        #     flash('The first image successfully uploaded', category='success')
-        # else:
-        #     flash('Allowed image types are - png, jpg, jpeg, gif')
-        #     return redirect(request.url)
-
-        # Img = Image.query.filter_by(user_id=current_user.id).order_by(Image.img).all()
-        total = 0
-        point = 0
-        dataset = load('D://Github//graduation-thesis//Face-Verify//friends_dataset_embeddings.npz')
-        newTraindataX = dataset['arr_0']
-
-
-        for newTrain_Image in newTraindataX:
-            # # print(im.img)
-            # imageB_pixel, imageB_align = extract_face(im.img)
-            newTrain_ImageB = list()
-            # imageB_embedding = get_embedding(MODEL, imageB_align)
-            newTrain_ImageB.append(newTrain_Image)
-            newTrain_ImageB = np.asarray(newTrain_ImageB)
-
-            cosine_distances_score = compare_images(newTrain_ImageA,newTrain_ImageB)
-
-            # print(cosine_distances_score)
-            point += 1
-            total += cosine_distances_score
-
-        mean = total/point
-
-        title = str(current_user.first_name)
-        fig = plt.figure(title,figsize=(5, 3), facecolor="#F3F1F5")
-        if (mean > 0.5):
-            plt.suptitle("TRUE: the result is " + title)
-        else:
-            plt.suptitle("FALSE: the result is not " + title)
-
-        # plt.suptitle("MSE: %.2f, SSIM: %.2f" % (m, s))
-        # show first image
-        ax1 = fig.add_subplot(1, 3, 1)
-        ax1.title.set_text("Base image")
-        img_base = plt.imread(imageA_path)
-        plt.imshow(img_base, cmap=plt.cm.gray)
-        plt.axis("off")
-        # show the second image
-        ax2 = fig.add_subplot(1, 3, 2)
-        ax2.title.set_text("Detected face")
-        plt.imshow(imageA_pixel, cmap=plt.cm.gray)
-        plt.axis("off")
-        # show the third image
-        ax3 = fig.add_subplot(1, 3, 3)
-        ax3.title.set_text("Aligned image")
-        plt.xlabel(float(mean))
-        plt.imshow(imageA_align, cmap=plt.cm.gray)
-        plt.axis("off")
-        # show the images
-        plt.savefig(result_path() + title + '.jpg')
-        plt.close()
-
-        pic = current_user.first_name + '.jpg'
-        img1 = Image1.open(os.path.join(result_path(), pic))
-        data = io.BytesIO()
-        img1.save(data, "JPEG")
-
-        encode_image = base64.b64encode(data.getvalue())
-        return render_template("verify.html", pic = encode_image.decode("UTF-8"), user=current_user, mean = float(mean))
+            flash('Repository is null!!! Please upload some images', category='error')
     return render_template("verify.html", user=current_user)
 
 
@@ -315,7 +318,7 @@ def load_face_dataset(path):
         newTrainX.append(embedding)
     newTrainX = np.asarray(newTrainX)
     # save arrays to one file in compressed format
-    np.savez_compressed('D:/Github/graduation-thesis/Face-Verify/friends_dataset_embeddings.npz', newTrainX)
+    np.savez_compressed(result_path() + 'friends_dataset_embeddings.npz', newTrainX)
 
 
 
@@ -355,6 +358,14 @@ def compare_images(imageA, imageB):
     skl = 1 - cosine_distances(imageA,imageB)
     # s = ssim(imageA, imageB)
     return skl
+
+def checkRepo(repoUser):
+    Img = Image.query.filter_by(user_id=repoUser).order_by(Image.img).all()
+    if Img is None:
+        return True
+    else:
+        return False
+
 
 @views.route('/delete-image', methods=['POST'])
 @login_required
